@@ -43,7 +43,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
-        // empty. Take care of releasing the Camera preview in your activity.
+        // Empty. Take care of releasing the Camera preview in your activity.
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -62,17 +62,28 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             // ignore: tried to stop a non-existent preview
         }
 
-        // set preview size and make any resize, rotate or
+        // Set preview size and make any resize, rotate or
         // reformatting changes here
         // set camera to vertical orientation
         mCamera.setDisplayOrientation(90);
         Camera.Parameters params = mCamera.getParameters();
-        List<String> focusModes = params.getSupportedFocusModes();
-        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+        params.setVideoStabilization(true);
+
+        List<Camera.Size> supportedSizes = params.getSupportedPreviewSizes();
+        Camera.Size bestResolution = supportedSizes.get(supportedSizes.size() - 1);
+        params.setPreviewSize(bestResolution.width, bestResolution.height);
+
+        List<String>    focusModes = params.getSupportedFocusModes();
+        if(focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)){
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        } else
+        if(focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         }
 
-        // start preview with new settings
+        mCamera.setParameters(params);
+
+        // Start preview with new settings
         try {
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
